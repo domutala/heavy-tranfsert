@@ -14,12 +14,15 @@ export class AppController {
   }
 
   @Post('/transfert')
-  transfert(@Body() data: any) {
-    const id = uuidv4();
-    writeFileSync(
-      join(process.cwd(), '_FILES_', `${id}.json`),
-      JSON.stringify(data),
-    );
+  transfert(@Body() data: { files: any[] }) {
+    for (const file of data.files) {
+      const id = uuidv4();
+
+      writeFileSync(
+        join(process.cwd(), '..', '_FILES_', `${id}.json`),
+        JSON.stringify(file),
+      );
+    }
 
     return data;
   }

@@ -27,11 +27,16 @@
                 data: base64String,
               };
 
-              fetch('http://127.0.0.1:3000/transfert', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-              })
+              fetch(
+                'https://cuddly-meme-pgjv7rvrwrx29rw-3000.app.github.dev/transfert',
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    files: [data],
+                  }),
+                },
+              )
                 .then((response) => {
                   return response.json();
                 })
