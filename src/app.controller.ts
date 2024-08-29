@@ -1,20 +1,6 @@
 import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { AppService } from './app.service';
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { Response } from 'express';
-
-interface IFyle {
-  name: string;
-  type: string;
-  data: string;
-  size: number;
-}
-
-interface ITransfer {
-  file: IFyle;
-}
 
 @Controller()
 export class AppController {
@@ -26,33 +12,24 @@ export class AppController {
   }
 
   @Post('/transfer')
-  transfer(@Body() body: ITransfer) {
-    const id = uuidv4();
-
-    writeFileSync(
-      join(process.cwd(), '..', '_FILES_', `${id}.json`),
-      JSON.stringify(body),
-    );
-
-    return body;
+  async transfer(@Body() body: any) {
+    return await this.appService.transfer(body.file);
   }
 
   @Get('/download')
-  download(@Res() res: Response, @Query('id') id: string) {
-    const transfer = JSON.parse(
-      readFileSync(join(process.cwd(), '..', '_FILES_', `${id}.json`), 'utf-8'),
-    ) as ITransfer;
+  async download(@Res() res: Response, @Query('id') id: string) {
+    const fyle = await this.appService.getOne({ id });
+    if (!fyle) res.status(404).send();
 
-    const file = transfer.file;
     const buffer = Buffer.from(
-      file.data.replace(/.*(base64,)/gm, ''),
+      fyle.data.replace(/.*(base64,)/gm, ''),
       'base64',
     );
-    const mimeType = file.type;
+    const mimeType = fyle.type;
 
     res.set({
       'Content-Type': mimeType,
-      'Content-Disposition': `attachment; filename="${file.name}"`,
+      'Content-Disposition': `attachment; filename="${fyle.name}"`,
     });
 
     res.send(buffer);
